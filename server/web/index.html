@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>WebPlayer</title>
+	<meta name="description" content="">
+
+	<link rel="stylesheet" href="./assets/v.css">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<body class="ember-application is-open-slideout">
+		<script type="text/javascript" src="./assets/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="./assets/bootstrap.min.js"></script>
+		<script type="text/javascript" src="./assets/swfobject.js"></script>
+		<script type="text/javascript" src="./assets/json2.js"></script>
+		<script type="text/javascript" src="./assets/srs.page.js"></script>
+		<script type="text/javascript" src="./assets/srs.log.js"></script>
+		<script type="text/javascript" src="./assets/srs.player.js"></script>
+		<script type="text/javascript" src="./assets/srs.publisher.js"></script>
+		<script type="text/javascript" src="./assets/srs.utility.js"></script>
+		<script type="text/javascript" src="./assets/jquery.easing.js"></script>
+		<script type="text/javascript" src="./assets/jquery.mousewheel.js"></script>
+		<script type="text/javascript" src="./assets/jquery.cycle2.js"></script>
+		<script type="text/javascript" src="./assets/jquery.cycle2.carousel.js"></script>
+		<script type="text/javascript" src="./assets/zelect.js"></script>
+		<script type="text/javascript" src="./assets/fixedsticky.js"></script>
+		<script type="text/javascript" src="./assets/jquery.mCustomScrollbar.concat.min.js"></script>
+		<script type="text/javascript" src="./assets/srs.js"></script>
+		<script type="text/javascript">
+			var lastget = 0;
+			
+			function send(){
+				dataa = $('#input').val();
+				$('#input').val('');
+				if (dataa.replace(/\s/g,'')=='') return;
+				$.get('./ajax/sendchat.php?a=0&c='+encodeURIComponent(dataa),function(data){
+					rows=data[0];
+					for(i in data[1]){
+						if (typeof $('#chatline_'+i)[0]=='undefined'){
+							$('#ccontents').append(data[1][i]);
+							setTimeout(function(){$('#chat__talk').mCustomScrollbar("scrollTo", "bottom");},100);
+						}
+					}
+				});
+			}
+			function refresh(){
+				$.get('./ajax/getchat.php?a=0',function(data){
+					//console.log(data);
+					rows=data[0];
+					for(i in data[1]){
+						if (typeof $('#chatline_'+i)[0]=='undefined'){
+							$('#ccontents').append(data[1][i]);
+							setTimeout(function(){$('#chat__talk').mCustomScrollbar("scrollTo", "bottom");},100);
+						}
+					}
+				});
+				setTimeout(refresh,2000);
+			}
+			function refresh2(){
+				$('#info').load('./ajax/getline.php?a=0');
+				setTimeout(refresh2,500);
+			}
+			function refresh3(){
+				$.get('./api/get.php?r=0',function(data){
+					$('#code').html('Time: '+((new Date(1000*data['time'])).toString())+'<br/>Command: '+data['command']);
+				});
+				setTimeout(refresh3,5000);
+			}
+			refresh();
+			refresh2();
+			refresh3();
+		</script>
+
+
+			<div class="tabs">
+				<nav class="tabs__nav container">
+				</nav>
+				<div class="tabs__content tab-content">
+
+					<div class="live-data live-data-full">
+						<div id="main_modal" style="padding: 5px;">
+							<div class="modal-body">
+								<div id="player">
+									<div id="div_container">
+										<object type="application/x-shockwave-flash" data="./assets/srs_player.swf?_version=1.23" id="player_id" style="visibility: visible;">
+											<param name="wmode" value="opaque">
+											<param name="allowFullScreen" value="true">
+											<param name="allowScriptAccess" value="always">
+											<param name="flashvars" value="id=100&amp;on_player_ready=__srs_on_player_ready&amp;on_player_metadata=__srs_on_player_metadata&amp;on_player_timer=__srs_on_player_timer">
+										</object>
+									</div>
+								</div>
+							</div>
+							<div class="footer" id="my_modal_footer">
+								Console:
+								<div class="well" style="border: 1px solid #ddd;" id="info" style="width:100%"> </div>
+								Last Command:
+								<div class="well" style="border: 1px solid #ddd;" id="code" style="width:100%"> </div>
+								RTMP Address:
+								<input id="rtmp" style="width:100%" />
+								<div class="progress progress-striped active" id="pb_buffer_bg" title="Buffer Length:0.8s(100.0%)">
+									<div class="bar" style="width: 100%;" id="pb_buffer"></div>
+								</div>
+								<div class="input-prepend" id="div_play_time">
+									<span class="add-on" style="height: 30px;" title="播放时长">@T</span>
+									<input class="span2" style="width: 115px;height: 30px;" id="txt_time" type="text" placeholder="天 时:分:s">
+									<button id="btn" style="height: 30px;" class="btn btn--secondary btn--active">Pause</button>
+								</div>
+								<div class="">
+										<table>
+										<tr><td>
+										Fullscreen Size
+										</td><td>
+										<a class="btn btn--secondary btn--active" id="btn_fs_size_screen_100" href="#">100%</a>
+										
+										<a class="btn btn--secondary btn--active" id="btn_fs_size_screen_75" href="#">75%</a>
+										
+										<a class="btn btn--secondary btn--active" id="btn_fs_size_screen_50" href="#">50%</a>
+										</td></tr>
+										<tr><td>
+										W/H Ratio
+										</td><td>
+										<a class="btn btn--secondary btn--active" id="btn_dar_original" href="#">Original</a>
+										
+										<a class="btn btn--secondary btn--active" id="btn_dar_21_9" href="#">21:9</a>
+										
+										<a class="btn btn--secondary btn--active" id="btn_dar_16_9" href="#">16:9</a>
+										<a class="btn btn--secondary btn--active" id="btn_dar_16_10" href="#">16:9</a>
+										
+										<a class="btn btn--secondary btn--active" id="btn_dar_4_3" href="#">4:3</a>
+										<a class="btn btn--secondary btn--active" id="btn_dar_1_1" href="#">1:1</a>
+										
+										<a class="btn btn--secondary btn--active" id="btn_dar_fill" href="#">Container Size</a>
+										</td></tr>
+										<tr><td>Buffer (s)
+										</td><td>
+										
+										<a class="btn btn--secondary btn--active" id="btn_bt_0_5" href="#">0.5s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_0_8" href="#">0.8s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_1" href="#">1s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_2" href="#">2s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_3" href="#">3s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_5" href="#">5s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_10" href="#">10s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_15" href="#">15s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_20" href="#">20s</a>
+										<a class="btn btn--secondary btn--active" id="btn_bt_30" href="#">30s</a>
+										</td></tr>
+										</table>
+								</div>
+								<div class="">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="slideout">
+				<div id="sidebar-content is-open-slideout-2" class="slideout__content">
+
+					<div class="slideout__content" data-bindattr-137="137">
+						<div class="slideout__content__inside chat action-slideout__chat chat-slider mCustomScrollbar _mCS_1">
+							<div id="mCSB_1" class="mCustomScrollBox mCS-dark mCSB_vertical mCSB_inside" tabindex="0">
+								<div id="mCSB_1_container" class="mCSB_container" style="position: relative; left: 0px;" dir="ltr">
+									<div class="slideout__content--chat">
+										<div class="ember-view">
+											<div class="chat__talk" id="ccontents">
+												
+													
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="chat__input-holder action-slideout__chat">
+								<textarea id="input" class="ember-view ember-text-area input input--chat" placeholder=""></textarea><button class="btn btn--chat" onclick="send();">Submit</button>
+						</div>
+						<script>
+							var $inp = $('#input');
+							$inp.keydown(function (e) { 
+								var key = e.which;
+								if (key == 13) send();
+							});
+						</script>
+					</div>
+
+				</div>
+
+			</div>
+	</body>
+
+</html>
