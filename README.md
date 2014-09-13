@@ -1,13 +1,13 @@
 flaperon
 ========
-a pcDuino-based remote experiment system.
+a pcDuino-based remote experiment system, with live broadcast
 
 
-## Project Page:
+## Project Page
 http://jebwizoscar.github.io/flaperon
 
-## Project Goal:
-easy, cheap system for doing experiment remote and online.
-
-## Name Origin:
+## Name Origin
 flaperon + goto = rooftop + angel
+
+## Something
+This project uses https://github.com/winlinvip/simple-rtmp-server as rtmp server ( install-rtmp.sh )
