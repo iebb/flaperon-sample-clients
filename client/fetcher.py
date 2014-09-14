@@ -26,6 +26,9 @@ while 1:
 	if 'START' in j:
 		t1 = Thread(target=start,args=(5,))
 		t1.start()
+	if 'STOP' in j:
+		t1 = Thread(target=start,args=(5,))
+		t1.stop()
 	print j
 	time.sleep(5)
 t2 = Thread(target=watchdog,args=(5,))
