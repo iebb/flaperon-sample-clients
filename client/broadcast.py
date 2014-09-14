@@ -1,8 +1,6 @@
 '''
 	Broadcast Client for pcDuino / other ubuntu systems
-	Version: 0
-	Date: 2014-09-10
-	by Jeb <1@wa.vg>
+	by Jeb <1@wa.vg> 2014-09-10
 '''
 STREAM_URL="rtmp://192.168.1.233:1935/live/stream1" # url prefix for streaming
 REPORT_URL="http://192.168.1.233/api/update.php?r=0&c=" # url prefix for status report
