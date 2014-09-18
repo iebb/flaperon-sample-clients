@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -20,7 +20,6 @@
 		<script type="text/javascript" src="./assets/srs.utility.js"></script>
 		<script type="text/javascript" src="./assets/jquery.easing.js"></script>
 		<script type="text/javascript" src="./assets/jquery.mousewheel.js"></script>
-		<script type="text/javascript" src="./assets/zelect.js"></script>
 		<script type="text/javascript" src="./assets/fixedsticky.js"></script>
 		<script type="text/javascript" src="./assets/jquery.mCustomScrollbar.concat.min.js"></script>
 		<script type="text/javascript" src="./assets/srs.js"></script>
@@ -56,13 +55,16 @@
 			}
 			function refresh2(){
 				$('#info').load('./ajax/getline.php?a=0');
-				setTimeout(refresh2,500);
+				setTimeout(refresh2,3000);
 			}
 			function refresh3(){
 				$.get('./api/get.php?r=0',function(data){
 					$('#code').html('Time: '+((new Date(1000*data['time'])).toString())+'<br/>Command: '+data['command']);
 				});
 				setTimeout(refresh3,5000);
+			}
+			function sendcmd(command,interval,count){
+				$.get('./api/send.php?server=0&interval='+interval+'&repeat='+count+'&command='+command);
 			}
 			refresh();
 			refresh2();
@@ -102,7 +104,9 @@
 								<div class="input-prepend" id="div_play_time">
 									<span class="add-on" style="height: 30px;" title="播放时长">@T</span>
 									<input class="span2" style="width: 115px;height: 30px;" id="txt_time" type="text" placeholder="天 时:分:s">
-									<button id="btn" style="height: 30px;" class="btn btn--secondary btn--active">Pause</button>
+									<button id="btn" class="btn btn--secondary btn--active">Pause</button>
+									<button onclick="sendcmd('START',1,0)" class="btn btn--secondary btn--active">Start</button>
+									<button onclick="sendcmd('COLLECT',1000,10)" class="btn btn--secondary btn--active">Collect</button>
 								</div>
 								<div class="">
 										<table>
