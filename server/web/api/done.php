@@ -9,5 +9,7 @@
 	$sql = "SELECT * FROM commands WHERE (server = $server) AND (status <= $status) AND (remain>0) ORDER BY time $order ";
 	$result = mysql_query($sql);
 	$row = mysql_fetch_object($result);
-	echo json_encode($row);
+	$id = $row->id;
+	echo $sql = "UPDATE commands SET remain=remain-1, exec=exec+1 WHERE id=$id";
+	$result = mysql_query($sql);
 ?>
