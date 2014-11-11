@@ -1,2 +1,1 @@
-COLLECT is for calculating pH.
-code see pH/pH.ino
+# A sample client for http://f.wa.vg/2
