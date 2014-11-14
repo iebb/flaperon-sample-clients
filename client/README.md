@@ -1,1 +1,0 @@
-# A sample client for http://f.wa.vg/2
