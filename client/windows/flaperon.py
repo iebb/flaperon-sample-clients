@@ -7,6 +7,7 @@
 	2014-10-16 v1.414
 	2014-11-11 v2
 	2014-11-12 v2 Windows Port
+	2014-11-18 v2.8 Added Config
 '''
 import thread
 import os
@@ -17,12 +18,27 @@ import json
 import unicurses
 import re
 from unicurses import *
-# -----modify this part------
-SERVER_ADDR="10.1.2.177"
-STREAM_NAME="test"
-BROADCAST_ID="1"
-RESOLUTION="320x240"
-# -----end-----
+CONFIG={}
+try:
+	f = open('config.json', 'r')
+	CONFIG=json.loads(f.read())
+	f.close()
+	SERVER_ADDR=CONFIG['SERVER_ADDR']
+	STREAM_NAME=CONFIG['STREAM_NAME']
+	BROADCAST_ID=CONFIG['BROADCAST_ID']
+	RESOLUTION=CONFIG['RESOLUTION']
+except:
+	print 'Can\'t load Config'
+	CONFIG['SERVER_ADDR']="your-server-address-here"
+	CONFIG['STREAM_NAME']="stream-name"
+	CONFIG['BROADCAST_ID']="broadcast-id"
+	CONFIG['RESOLUTION']="320x240"
+	f = open('config.json', 'w')
+	f.write(json.dumps(CONFIG,indent=4))
+	f.close()
+	print 'Edit config.json first'
+	raw_input()
+	exit(0)
 
 STREAM_URL="rtmp://"+SERVER_ADDR+":1935/live/"+STREAM_NAME
 VIDEO_DEVICE="dummy"
@@ -72,7 +88,7 @@ if len(VIDEO_DEVICES):
 				return choice + 1
 				break
 
-	stdscr = unicurses.initscr()
+	stdscr = initscr()
 	clear()
 	noecho()
 	cbreak()
@@ -116,16 +132,16 @@ if len(VIDEO_DEVICES):
 
 	endwin()
 
-unicurses.start_color()
-unicurses.init_pair(1, 8+unicurses.COLOR_GREEN, unicurses.COLOR_BLACK)
-unicurses.init_pair(2, 8+unicurses.COLOR_CYAN, unicurses.COLOR_BLACK)
-unicurses.init_pair(3, 8+unicurses.COLOR_RED, unicurses.COLOR_BLACK)
+start_color()
+init_pair(1, 8+COLOR_GREEN, COLOR_BLACK)
+init_pair(2, 8+COLOR_CYAN, COLOR_BLACK)
+init_pair(3, 8+COLOR_RED, COLOR_BLACK)
 
 
 
 
 def listen():
-	mvaddstr(9,10, 'Thread LISTEN Started!',  unicurses.color_pair(2))
+	mvaddstr(9,10, 'Thread LISTEN Started!',  color_pair(2))
 	'''
 	GET_URL="http://"+SERVER_ADDR+"/web/getcommand.php?r="+BROADCAST_ID
 	DONE_URL="http://"+SERVER_ADDR+"/web/donecommand.php?r="+BROADCAST_ID+"&data="
@@ -136,13 +152,13 @@ def listen():
 			req = urllib2.urlopen(urllib2.Request(GET_URL), data=None, timeout=3)
 			j = req.read()
 			k = json.loads(j)
-			mvaddstr(17,0, "Commands Processed: "+str(COUNT_PROCESSED) + " / Queued: "+str(len(k))+"		  ",  unicurses.color_pair(2))
+			mvaddstr(17,0, "Commands Processed: "+str(COUNT_PROCESSED) + " / Queued: "+str(len(k))+"		  ",  color_pair(2))
 			if len(k)>0:
 				COUNT_PROCESSED += 1
 				k1 = k[0]
 				f = os.popen('./'+k1['command'])
 				data = f.read()
-				mvaddstr(9,10, data,  unicurses.color_pair(2))
+				mvaddstr(9,10, data,  color_pair(2))
 				DONE_SURL=DONE_URL+urllib.quote(data)+"&id="+k1['id']
 				#print DONE_SURL
 				_req = urllib2.urlopen(urllib2.Request(DONE_SURL), data=None, timeout=3)
@@ -153,14 +169,14 @@ def listen():
 	'''
 	
 def getdata():
-	mvaddstr(10,10, 'Thread GETDATA Started!',  unicurses.color_pair(2))
+	mvaddstr(10,10, 'Thread GETDATA Started!',  color_pair(2))
 	'''
 	SEND_URL="http://"+SERVER_ADDR+"/web/senddata.php?r="+BROADCAST_ID+"&data="
 	while 1:
 		try:
 			f = os.popen('./GETDATA')
 			data = f.read()
-			mvaddstr(10,10, data,  unicurses.color_pair(2))
+			mvaddstr(10,10, data,  color_pair(2))
 			SURL=SEND_URL+urllib.quote(data)
 			req = urllib2.urlopen(urllib2.Request(SURL), data=None, timeout=3)
 			j = req.read()
@@ -172,9 +188,9 @@ def getdata():
 	
 def streaming():
 	global COUNT_DROPS,COUNT_FRAMES,DPR,VIDEO_DEVICE,choice
-	mvaddstr(11,10, 'Thread STREAMING Started!',  unicurses.color_pair(2))
+	mvaddstr(11,10, 'Thread STREAMING Started!',  color_pair(2))
 	cmd = 'avconv.exe -f dshow -s '+RESOLUTION+' -i video="'+VIDEO_DEVICE+'" -f flv "'+STREAM_URL+'"'
-	mvaddstr(23,0, cmd,  unicurses.color_pair(2))
+	mvaddstr(23,0, cmd,  color_pair(2))
 	
 	while 1:
 		COUNT_DROPS=0
@@ -195,7 +211,7 @@ def streaming():
 				for k0 in lines:
 					if len(k0)>10:
 						v=u
-						mvaddstr(11,10, v[:70],  unicurses.color_pair(2))
+						mvaddstr(11,10, v[:70],  color_pair(2))
 						clrtoeol()
 						_=r1.findall(v)
 						if len(_):
@@ -207,7 +223,7 @@ def streaming():
 						if len(_):
 							COUNT_FRAMES=int(_[0])+COUNT_DROPS
 							DPR = 100.0 * COUNT_DROPS / COUNT_FRAMES
-							mvaddstr(16,0, "Video: frames: "+str(COUNT_FRAMES) + " / drops: "+str(COUNT_DROPS) + " / dropping rate: "+("%.4f %%" % DPR),  unicurses.color_pair(2))
+							mvaddstr(16,0, "Video: frames: "+str(COUNT_FRAMES) + " / drops: "+str(COUNT_DROPS) + " / dropping rate: "+("%.4f %%" % DPR),  color_pair(2))
 							clrtoeol()
 						if 'Input/output error' in v:
 							flag = 0
@@ -224,27 +240,27 @@ thread.start_new_thread(listen,())
 clear()
 noecho()
 
-mvaddstr(0,0, "+-------------------------------------------------+",  unicurses.color_pair(1))
-mvaddstr(1,0, "|        Flaperon Daemon v2.0     b20141111       |",  unicurses.color_pair(1))
-mvaddstr(2,0, "+-------------------------------------------------+",  unicurses.color_pair(1))
+mvaddstr(0,0, "+-------------------------------------------------+",  color_pair(1))
+mvaddstr(1,0, "|        Flaperon Daemon v2.0     b20141111       |",  color_pair(1))
+mvaddstr(2,0, "+-------------------------------------------------+",  color_pair(1))
 
-mvaddstr(3,0, ">>> Server Address: "+str(SERVER_ADDR),  unicurses.color_pair(3))
-mvaddstr(4,0, ">>> Screen Resolution: "+str(RESOLUTION),  unicurses.color_pair(3))
-mvaddstr(5,0, ">>> RTMP Stream: "+str(STREAM_URL),  unicurses.color_pair(3))
-mvaddstr(6,0, ">>> Video Device: "+str(VIDEO_DEVICE),  unicurses.color_pair(3))
-mvaddstr(7,0, ">>> Broadcast ID: "+str(BROADCAST_ID),  unicurses.color_pair(3))
+mvaddstr(3,0, ">>> Server Address: "+str(SERVER_ADDR),  color_pair(3))
+mvaddstr(4,0, ">>> Screen Resolution: "+str(RESOLUTION),  color_pair(3))
+mvaddstr(5,0, ">>> RTMP Stream: "+str(STREAM_URL),  color_pair(3))
+mvaddstr(6,0, ">>> Video Device: "+str(VIDEO_DEVICE),  color_pair(3))
+mvaddstr(7,0, ">>> Broadcast ID: "+str(BROADCAST_ID),  color_pair(3))
 
-mvaddstr(9,0, "Commands :",  unicurses.color_pair(1))
-mvaddstr(10,0, "Data	 :",  unicurses.color_pair(1))
-mvaddstr(11,0, "Streaming:",  unicurses.color_pair(1))
+mvaddstr(9,0, "Commands :",  color_pair(1))
+mvaddstr(10,0, "Data	 :",  color_pair(1))
+mvaddstr(11,0, "Streaming:",  color_pair(1))
 
 
-mvaddstr(13,0, "Flaperon System is Up for ",  unicurses.color_pair(3))
-mvaddstr(15,0, "\n",  unicurses.color_pair(1))
+mvaddstr(13,0, "Flaperon System is Up for ",  color_pair(3))
+mvaddstr(15,0, "\n",  color_pair(1))
 refresh()
 while 1:
 	diff = time.time()-start_time
-	mvaddstr(13,27, "%d days, %d hours, %d minutes and %.3f seconds" % (int(diff/86400),(int(diff)%86400)/3600 ,(int(diff)%3600)/60 ,diff - int(diff/60)*60),  unicurses.color_pair(2))
+	mvaddstr(13,27, "%d days, %d hours, %d minutes and %.3f seconds" % (int(diff/86400),(int(diff)%86400)/3600 ,(int(diff)%3600)/60 ,diff - int(diff/60)*60),  color_pair(2))
 	clrtoeol()
 	refresh()
 	time.sleep(0.1)

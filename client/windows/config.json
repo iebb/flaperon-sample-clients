@@ -1,0 +1,6 @@
+{
+    "STREAM_NAME": "test", 
+    "RESOLUTION": "320x240", 
+    "SERVER_ADDR": "10.1.2.177", 
+    "BROADCAST_ID": "1"
+}
